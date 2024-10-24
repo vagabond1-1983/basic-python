@@ -26,12 +26,13 @@ for song in song_ids[:5]:
     id = song["href"][song["href"].find("id=") : len(song["href"])]
     music_download_url = f"http://music.163.com/song/media/outer/url?{id}.mp3"
     print(f"音乐下载地址：{music_download_url}")
-    # todo 下载的 mp3 都是 195kb，有问题
+    # mp3 地址有重定向，需要拿到最终的重定向中headers 头部的 location 信息，作为歌曲的下载地址
     resp = requests.get(url=music_download_url, headers=headers)
     reditList = resp.history
     print(f"获取最终重定向的headers头部信息：{reditList[len(reditList) - 1].headers}")
     redirect_url = reditList[len(reditList) - 1].headers["location"]
     print(f"获取重定向最终的url：{redirect_url}")
+    # 获取到歌曲的二进制流，输出到文件中保存
     media_content = requests.get(url=redirect_url, headers=headers).content
     with open(filename + os.path.sep + title + ".mp3", mode="wb") as f:
         f.write(media_content)
