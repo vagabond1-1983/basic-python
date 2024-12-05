@@ -10,7 +10,7 @@ async def main():
         "name": "News Teaser Extractor",
         "baseSelector": ".wide-tease-item__wrapper",
         "fields": [
-            {"name": "category", "selector": ".unibrow span[data-testid='unibrow-text']", "type": "text"},
+            {"name": "category", "selector": "span[data-testid='unibrow-text']", "type": "text"},
             {"name": "headline", "selector": ".wide-tease-item__headline", "type": "text"},
             {"name": "summary", "selector": ".wide-tease-item__description", "type": "text"},
             {"name": "time", "selector": "[data-testid='wide-tease-date']", "type": "text"},
