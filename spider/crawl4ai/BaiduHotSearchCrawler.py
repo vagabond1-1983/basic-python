@@ -6,19 +6,16 @@ from pathlib2 import Path
 from crawl4ai import AsyncWebCrawler, CacheMode
 from crawl4ai.extraction_strategy import JsonCssExtractionStrategy
 
-input = "韩国政府"
-url = f"http://www.baidu.com/s?rtt=1&bsst=1&cl=2&tn=news&rsv_dl=ns_pc&word={input}"
+url = f"https://top.baidu.com/board?tab=realtime"
 schema = {
-        "name": "News Teaser Extractor",
-        "baseSelector": "div[id=content_left] .result-op",
-        "fields": [
-            {"name": "title", "selector": "h3 a[aria-label]", "type": "attribute", "attribute": "aria-label"},
-            {"name": "publish_time", "selector": ".c-row span.c-color-gray2", "type": "text"},
-            {"name": "summary", "selector": ".c-row span.c-color-text", "type": "attribute", "attribute": "aria-label"},
-            {"name": "link", "selector": "a[href]", "type": "attribute", "attribute": "href"},
-            {"name": "source_name", "selector": ".c-row span.c-color-gray", "type": "text"},
-        ],
-    }
+    "name": "Baidu Hot Search News Teaser Extractor",
+    "baseSelector": ".container-bg_lQ801 .category-wrap_iQLoo",
+    "fields": [
+        {"name": "title", "selector": ".content_1YWBm .c-single-text-ellipsis", "type": "text"},
+        {"name": "summary", "selector": ".content_1YWBm .large_nSuFU", "type": "text"},
+        {"name": "hot_point", "selector": ".trend_2RttY .hot-index_1Bl1a", "type": "text"},
+    ],
+}
 
 
 # https://github.com/unclecode/crawl4ai
@@ -26,12 +23,18 @@ async def extract_items(input):
     screenshot_file = Path(f"../../screenshots/{Path(__file__).stem}.png")
 
     extraction_strategy = JsonCssExtractionStrategy(schema, verbose=True)
-    async with AsyncWebCrawler(verbose=True) as crawler:
+    async with AsyncWebCrawler(
+            verbose=True,
+            headless=True,
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    ) as crawler:
         result = await crawler.arun(
             url=url,
             extraction_strategy=extraction_strategy,
             cache_mode=CacheMode.BYPASS,
             screenshot=True,
+            # screenshot_wait_for=5.0,  # Wait 2 seconds before capture
+            # magic=True,  # Enables all anti-detection features
         )
         assert result.success, "无法爬取该页面"
 
@@ -42,7 +45,7 @@ async def extract_items(input):
         # print(result.markdown_v2.raw_markdown)
         news_teasers = json.loads(result.extracted_content)
         print(f"成功提取了 {len(news_teasers)} 条")
-        print(json.dumps(news_teasers,indent=2, ensure_ascii=False))
+        print(json.dumps(news_teasers, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

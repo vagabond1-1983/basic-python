@@ -5,3 +5,4 @@ lxml
 asyncio
 aiohttp
 crawl4ai
+pathlib2
